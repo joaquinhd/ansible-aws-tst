@@ -1,7 +1,5 @@
 ---
 
-#### this is the good one!!!!
-
 - hosts: localhost
   connection: local
   gather_facts: False
