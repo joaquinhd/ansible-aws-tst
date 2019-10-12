@@ -1,0 +1,52 @@
+---
+
+#### this is the good one!!!!
+
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars:
+    key_name: my_aws
+    region: us-east-1
+    image: ami-04b9e92b5572fa0d1
+    id: "my-srv"
+    vpc_id: "vpc-aeeba2d4"
+    sec_group: "{{ id }}-sec"
+    state: present
+  tasks:
+    - name: Provisioning EC2 instances
+      block:
+      - name: Upload public key to AWS
+        ec2_key:
+          name: "{{ key_name }}"
+          key_material: "{{ lookup('file', '.ssh/{{ key_name }}.pub') }}"
+          region: "{{ region }}"
+      - name: Create security group
+        ec2_group:
+          name: "{{ sec_group }}"
+          description: "Sec group for app {{ id }}"
+          vpc_id: "{{ vpc_id }}"
+          region: "{{ region }}"
+          state: "{{ state }}"
+          rules:
+            - proto: tcp
+              ports:
+                - 22
+                - 80
+                - 443
+              cidr_ip: 0.0.0.0/0
+              rule_desc: allow all on ssh port, http, https
+        register: result_sec_group
+
+      - name: Provision instance(s)
+        ec2:
+          key_name: "{{ key_name }}"
+          id: "{{ id }}"
+          group_id: "{{ result_sec_group.group_id }}"
+          image: "{{ image }}"
+          instance_type: t2.micro
+          state: "{{ state }}"
+          region: "{{ region }}"
+          wait: true
+          count: 1
