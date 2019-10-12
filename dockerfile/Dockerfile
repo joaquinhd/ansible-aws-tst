@@ -8,8 +8,6 @@ RUN apt-get install -y vim nginx curl
 
 RUN service nginx start
 
-#CMD sed -i "s/<\/body/joaquinhd was here<\/body/g" /var/www/html/index.html
-
 RUN echo "<html><head><title>Hello Docker world</title></head> <body><h1>Hello World</h1> <p>Hey! Whats going on?!</p></body></html>" > /var/www/html/index.html
 
 CMD nginx -g 'daemon off;'
